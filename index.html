@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدول الدراسة الأسبوعي التفاعلي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        tajawal: ['Tajawal', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .rtl {
+                direction: rtl;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-tajawal rtl">
+    <button id="modeToggle" class="fixed top-4 left-4 bg-gray-200 dark:bg-gray-700 p-2 rounded-full shadow-lg z-50" aria-label="تبديل الوضع الليلي/النهاري">
+        <i class="fas fa-moon text-gray-800 dark:text-yellow-300"></i>
+    </button>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h1 class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4">جدول الدراسة الأسبوعي التفاعلي</h1>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">بداية من الجمعة الموافق 8/11/2024</p>
+            
+            <table class="w-full border-collapse mb-4">
+                <thead>
+                    <tr class="bg-blue-100 dark:bg-blue-900">
+                        <th class="border p-2 text-right">اليوم</th>
+                        <th class="border p-2 text-right">المادة</th>
+                        <th class="border p-2 text-right">ملاحظات</th>
+                        <th class="border p-2 text-right">الحالة</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTable">
+                    <!-- سيتم ملء هذا الجزء بواسطة JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">تقدم الدراسة الأسبوعي</h2>
+            <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-2">
+                <div id="weeklyProgress" class="bg-blue-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="progressText" class="text-center text-gray-600 dark:text-gray-400">0% مكتمل</p>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">مؤقت الدراسة</h2>
+            <div id="studyTimer" class="text-4xl font-bold text-center mb-4">25:00</div>
+            <div class="flex justify-center space-x-4">
+                <button id="startTimer" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">بدء</button>
+                <button id="pauseTimer" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">إيقاف مؤقت</button>
+                <button id="resetTimer" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">إعادة ضبط</button>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">قائمة المهام اليومية</h2>
+            <ul id="taskList" class="space-y-2 mb-4">
+                <!-- سيتم ملء هذا الجزء بواسطة JavaScript -->
+            </ul>
+            <button id="addTask" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">إضافة مهمة جديدة</button>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">ملاحظات إضافية</h2>
+            <ul class="list-disc list-inside text-gray-600 dark:text-gray-400">
+                <li>خذ استراحة 5 دقائق كل 25 دقيقة من الدراسة (تقنية بومودورو).</li>
+                <li>استخدم القهوة بحكمة: كوب في الصباح، وآخر بعد الظهر إذا لزم الأمر.</li>
+                <li>قم بتقييم يومي في نهاية كل يوم لتحديد النقاط التي تحتاج إلى تركيز إضافي.</li>
+                <li>احرص على النوم بين الساعة 10:30 و 11:00 مساءً للحصول على قسط كافٍ من الراحة.</li>
+            </ul>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">إعداد تنبيهات الواتساب</h2>
+            <ol class="list-decimal list-inside text-gray-600 dark:text-gray-400 mb-4">
+                <li>افتح تطبيق الواتساب على هاتفك.</li>
+                <li>انتقل إلى قائمة "الإعدادات" ثم اختر "التنبيهات".</li>
+                <li>قم بإنشاء تنبيه جديد لكل وقت دراسة (5:00 صباحًا، 12:00 ظهرًا، 3:00 عصرًا، 6:00 مساءً، 9:00 مساءً).</li>
+                <li>اختر نغمة مميزة لكل تنبيه لتمييزها عن الرسائل العادية.</li>
+                <li>قم بتكرار التنبيهات أسبوعيًا حسب جدول الدراسة.</li>
+            </ol>
+            <button id="setReminders" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">إعداد التنبيهات تلقائياً</button>
+        </div>
+
+        <div class="text-center text-gray-600 dark:text-gray-400 mt-8">
+            <p>تم إنشاء هذا الجدول بواسطة: Ahmed.R</p>
+            <p>للتواصل: +201098662418</p>
+        </div>
+    </div>
+
+    <a href="https://wa.me/201098662418" class="fixed bottom-4 left-4 bg-green-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg z-50" aria-label="تواصل معنا عبر واتساب">
+        <i class="fab fa-whatsapp text-2xl"></i>
+    </a>
+
+    <button id="chatbotToggle" class="fixed bottom-4 right-4 bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg z-50" aria-label="فتح المساعد الذكي">
+        <i class="fas fa-comments text-2xl"></i>
+    </button>
+
+    <div id="chatbotContainer" class="fixed bottom-20 right-4 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 hidden">
+        <div class="bg-blue-500 text-white p-3 rounded-t-lg font-bold">المساعد الذكي</div>
+        <div id="chatbotMessages" class="h-64 overflow-y-auto p-4 space-y-2"></div>
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+            <input type="text" id="chatbotInput" class="w-full p-2 border rounded-lg mb-2" placeholder="اكتب سؤالك هنا...">
+            <button id="chatbotSend" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full">إرسال</button>
+        </div>
+    </div>
+
+    <script>
+        // Cookie functions
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+        }
+
+        function getCookie(name) {
+            return document.cookie.split('; ').reduce((r, v) => {
+                const parts = v.split('=');
+                return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+            }, '');
+        }
+
+        // Dark Mode Toggle
+        const modeToggle = document.getElementById('modeToggle');
+        const html = document.documentElement;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                modeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+                modeToggle.setAttribute('aria-label', 'تبديل إلى الوضع النهاري');
+            } else {
+                document.documentElement.classList.remove('dark');
+                modeToggle.querySelector('i').classList.replace('fa-sun', 'fa-moon');
+                modeToggle.setAttribute('aria-label', 'تبديل إلى الوضع الليلي');
+            }
+            setCookie('darkMode', isDark ? '1' : '0', 365);
+        }
+
+        // Load dark mode preference from cookie
+        const savedDarkMode = getCookie('darkMode') === '1';
+        setDarkMode(savedDarkMode);
+
+        modeToggle.addEventListener('click', () => {
+            setDarkMode(!document.documentElement.classList.contains('dark'));
+        });
+
+        // Study Schedule
+        const scheduleData = [
+            { day: 'الجمعة', subject: 'أحياء', notes: 'التركيز على المفاهيم الأساسية' },
+            { day: 'السبت', subject: 'فيزياء', notes: 'حل تمارين وأسئلة سابقة' },
+            { day: 'الأحد', subject: 'كيمياء', notes: 'مراجعة المعادلات الكيميائية' },
+            { day: 'الاثنين', subject: 'إنجليزي', notes: 'التركيز على القواعد والمفردات' },
+            { day: 'الثلاثاء', subject: 'عربي', notes: 'قراءة النصوص وتحليلها' },
+            { day: 'الأربعاء', subject: 'رياضيات', notes: 'حل مسائل متنوعة' },
+            { day: 'الخميس', subject: 'مراجعة عامة', notes: 'تلخيص النقاط الرئيسية لكل مادة' },
+        ];
+
+        const scheduleTable = document.getElementById('scheduleTable');
+        const weeklyProgress = document.getElementById('weeklyProgress');
+        const progressText = document.getElementById('progressText');
+
+        function loadStudyStatus() {
+            const savedStatus = JSON.parse(getCookie('studyStatus') || '{}');
+            scheduleData.forEach((item, index) => {
+                const row = scheduleTable.insertRow();
+                row.innerHTML = `
+                    <td class="border p-2">${item.day}</td>
+                    <td class="border p-2">${item.subject}</td>
+                    <td class="border p-2">${item.notes}</td>
+                    <td class="border p-2">
+                        <button class="status-btn px-2 py-1 rounded text-white" data-day="${item.day}">
+                            ${savedStatus[item.day] || 'لم يبدأ'}
+                        </button>
+                    </td>
+                `;
+                updateButtonStyle(row.querySelector('.status-btn'));
+            });
+            updateProgress();
+        }
+
+        function updateButtonStyle(button) {
+            const status = button.textContent.trim();
+            if (status === 'لم يبدأ') {
+                button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            } else if (status === 'جاري الدراسة') {
+                button.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+            } else {
+                button.classList.add('bg-green-500', 'hover:bg-green-600');
+            }
+        }
+
+        function saveStudyStatus() {
+            const status = {};
+            document.querySelectorAll('.status-btn').forEach(button => {
+                status[button.dataset.day] = button.textContent.trim();
+            });
+            setCookie('studyStatus', JSON.stringify(status), 365);
+        }
+
+        scheduleTable.addEventListener('click', (e) => {
+            if (e.target.classList.contains('status-btn')) {
+                const button = e.target;
+                const currentStatus = button.textContent.trim();
+                if (currentStatus === 'لم يبدأ') {
+                    button.textContent = 'جاري الدراسة';
+                } else if (currentStatus === 'جاري الدراسة') {
+                    button.textContent = 'تم الإنجاز';
+                } else {
+                    button.textContent = 'لم يبدأ';
+                }
+                button.classList.remove('bg-blue-500', 'bg-yellow-500', 'bg-green-500', 'hover:bg-blue-600', 'hover:bg-yellow-600', 'hover:bg-green-600');
+                updateButtonStyle(button);
+                updateProgress();
+                saveStudyStatus();
+            }
+        });
+
+        function updateProgress() {
+            const totalDays = scheduleData.length;
+            const completedDays = Array.from(document.querySelectorAll('.status-btn')).filter(btn => btn.textContent.trim() === 'تم الإنجاز').length;
+            const progress = (completedDays / totalDays) * 100;
+            weeklyProgress.style.width = `${progress}%`;
+            progressText.textContent = `${Math.round(progress)}% مكتمل`;
+        }
+
+        // Load saved study status
+        loadStudyStatus();
+
+        // Study Timer
+        let timer;
+        let timeLeft = 1500; // 25 minutes in seconds
+        const timerDisplay = document.getElementById('studyTimer');
+        const startBtn = document.getElementById('startTimer');
+        const pauseBtn = document.getElementById('pauseTimer');
+        const resetBtn = document.getElementById('resetTimer');
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        startBtn.addEventListener('click', () => {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft === 0) {
+                    clearInterval(timer);
+                    alert('انتهى وقت الدراسة! خذ استراحة.');
+                }
+            }, 1000);
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            clearInterval(timer);
+        });
+
+        resetBtn.addEventListener('click', () => {
+            clearInterval(timer);
+            timeLeft = 1500;
+            updateTimerDisplay();
+        });
+
+        // Task List
+        const taskList = document.getElementById('taskList');
+        const addTaskBtn = document.getElementById('addTask');
+
+        function loadTasks() {
+            const savedTasks = JSON.parse(getCookie('tasks') || '[]');
+            taskList.innerHTML = '';
+            savedTasks.forEach((task, index) => {
+                const newTask = createTaskElement(task, index);
+                taskList.appendChild(newTask);
+            });
+        }
+
+        function saveTasks() {
+            const tasks = Array.from(taskList.children).map(li => ({
+                text: li.querySelector('label').textContent,
+                completed: li.querySelector('input[type="checkbox"]').checked
+            }));
+            setCookie('tasks', JSON.stringify(tasks), 365);
+        }
+
+        function createTaskElement(task, index) {
+            const li = document.createElement('li');
+            li.className = 'flex items-center space-x-2';
+            const taskId = `task${index + 1}`;
+            li.innerHTML = `
+                <input type="checkbox" id="${taskId}" class="form-checkbox h-5 w-5 text-blue-600 dark:text-yellow-300" ${task.completed ? 'checked' : ''}>
+                <label for="${taskId}" class="mr-2 ${task.completed ? 'line-through' : ''}">${task.text}</label>
+            `;
+            li.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
+                e.target.nextElementSibling.classList.toggle('line-through', e.target.checked);
+                saveTasks();
+            });
+            return li;
+        }
+
+        addTaskBtn.addEventListener('click', () => {
+            const newTaskText = prompt('أدخل المهمة الجديدة:');
+            if (newTaskText) {
+                const newTask = createTaskElement({ text: newTaskText, completed: false }, taskList.children.length);
+                taskList.appendChild(newTask);
+                saveTasks();
+            }
+        });
+
+        // Load saved tasks
+        loadTasks();
+
+        // WhatsApp Reminders
+        document.getElementById('setReminders').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('سيتم إعداد التنبيهات قريباً. هذه الميزة قيد التطوير.');
+        });
+
+        // Chatbot
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        const chatbotContainer = document.getElementById('chatbotContainer');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const chatbotSend = document.getElementById('chatbotSend');
+
+        chatbotToggle.addEventListener('click', () => {
+            chatbotContainer.classList.toggle('hidden');
+        });
+
+        function addChatMessage(message, isUser = false) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `p-2 rounded-lg ${isUser ? 'bg-blue-100 dark:bg-blue-700 text-blue-800 dark:text-white mr-auto' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white ml-auto'} max-w-3/4`;
+            messageElement.textContent = message;
+            chatbotMessages.appendChild(messageElement);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        const chatbotResponses = {
+            'مساعده': 'مرحبًا! الأوامر المتاحه هي كيف ابدأ / نصائح للتركيز / كيف أحسن حفظي / دعم نفسي؟',
+            'مرحبا': 'مرحبًا! كيف يمكنني مساعدتك في تنظيم دراستك اليوم؟',
+            'كيف أبدأ': 'للبدء، حاول تحديد أهدافك الدراسية لهذا الأسبوع. ثم استخدم جدول الدراسة لتتبع تقدمك في كل مادة.',
+            'نصائح للتركيز': 'جرب تقنية بومودورو: ادرس لمدة 25 دقيقة، ثم خذ استراحة لمدة 5 دقائق. كرر هذه الدورة 4 مرات، ثم خذ استراحة أطول.',
+            'كيف أحسن حفظي': 'جرب استخدام تقنيات مثل المراجعة المتكررة، وإنشاء خرائط ذهنية، وشرح المفاهيم لشخص آخر لتحسين الحفظ.',
+            'دعم نفسي': 'يمكنني مساعدتك في تنظيم وقتك، تقديم نصائح للدراسة الفعالة، أو الإجابة على أسئلة محددة حول المواد الدراسية. ما الذي تحتاج المساعدة فيه تحديدًا؟'
+        };
+
+        chatbotSend.addEventListener('click', () => {
+            const message = chatbotInput.value.trim();
+            if (message) {
+                addChatMessage(message, true);
+                chatbotInput.value = '';
+                
+                // Simple bot response logic
+                let botResponse = 'عذرًا، لم أفهم سؤالك. هل يمكنك إعادة صياغته أو طرح سؤال اخر (اكتب مساعده ) لمعرفه أوامر البوت؟';
+                for (const [key, value] of Object.entries(chatbotResponses)) {
+                    if (message.includes(key)) {
+                        botResponse = value;
+                        break;
+                    }
+                }
+                
+                setTimeout(() => {
+                    addChatMessage(botResponse);
+                }, 1000);
+            }
+        });
+
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                chatbotSend.click();
+            }
+        });
+
+        // Initial bot message
+        addChatMessage("مرحبًا! أنا هنا لمساعدتك في تنظيم دراستك. كيف يمكنني مساعدتك اليوم؟");
+    </script>
+</body>
+</html>
