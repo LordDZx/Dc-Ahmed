@@ -59,6 +59,7 @@
                 <div id="weeklyProgress" class="bg-blue-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
             </div>
             <p id="progressText" class="text-center text-gray-600 dark:text-gray-400">0% مكتمل</p>
+            <p id="motivationalMessage" class="text-center text-green-600 dark:text-green-400 mt-4 font-bold"></p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
@@ -177,6 +178,7 @@
         const scheduleTable = document.getElementById('scheduleTable');
         const weeklyProgress = document.getElementById('weeklyProgress');
         const progressText = document.getElementById('progressText');
+        const motivationalMessage = document.getElementById('motivationalMessage');
 
         function loadStudyStatus() {
             const savedStatus = JSON.parse(getCookie('studyStatus') || '{}');
@@ -199,6 +201,7 @@
 
         function updateButtonStyle(button) {
             const status = button.textContent.trim();
+            button.classList.remove('bg-blue-500', 'bg-yellow-500', 'bg-green-500', 'hover:bg-blue-600', 'hover:bg-yellow-600', 'hover:bg-green-600');
             if (status === 'لم يبدأ') {
                 button.classList.add('bg-blue-500', 'hover:bg-blue-600');
             } else if (status === 'جاري الدراسة') {
@@ -227,7 +230,6 @@
                 } else {
                     button.textContent = 'لم يبدأ';
                 }
-                button.classList.remove('bg-blue-500', 'bg-yellow-500', 'bg-green-500', 'hover:bg-blue-600', 'hover:bg-yellow-600', 'hover:bg-green-600');
                 updateButtonStyle(button);
                 updateProgress();
                 saveStudyStatus();
@@ -240,6 +242,23 @@
             const progress = (completedDays / totalDays) * 100;
             weeklyProgress.style.width = `${progress}%`;
             progressText.textContent = `${Math.round(progress)}% مكتمل`;
+            updateMotivationalMessage(completedDays);
+        }
+
+        function updateMotivationalMessage(completedDays) {
+            const messages = [
+                { days: 0, emoji: '💪', message: 'أنت لم تكمل أي يوم إلى الآن. لا تفشل، أنت تستطيع ذلك!' },
+                { days: 1, emoji: '🌟', message: 'أحسنت! لقد أكملت أول يوم. أنت تقترب من هدفك!' },
+                { days: 2, emoji: '🚀', message: 'رائع! يومان من التقدم. أنت تتحسن كل يوم!' },
+                { days: 3, emoji: '🏆', message: 'ممتاز! ثلاثة أيام متتالية. استمر في العمل الجاد!' },
+                { days: 4, emoji: '🎉', message: 'مذهل! أربعة أيام من النجاح. أنت تحقق إنجازات رائعة!' },
+                { days: 5, emoji: '🌈', message: 'لا يصدق! خمسة أيام من التفوق. أنت بطل حقيقي!' },
+                { days: 6, emoji: '🎓', message: 'مبهر! ستة أيام من التميز. أنت على وشك إتمام الأسبوع!' },
+                { days: 7, emoji: '🏅', message: 'تهانينا! لقد أكملت الأسبوع بأكمله. أنت نجم ساطع!' },
+            ];
+
+            const message = messages.find(m => m.days === completedDays) || messages[messages.length - 1];
+            motivationalMessage.textContent = `${message.emoji} ${message.message}`;
         }
 
         // Load saved study status
@@ -392,6 +411,52 @@
 
         // Initial bot message
         addChatMessage("مرحبًا! أنا هنا لمساعدتك في تنظيم دراستك. كيف يمكنني مساعدتك اليوم؟");
+
+        // API Endpoints
+        async function fetchAPI(endpoint) {
+            try {
+                const response = await fetch(`/api/${endpoint}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching API:', error);
+                return null;
+            }
+        }
+
+        async function getSchedule() {
+            return await fetchAPI('schedule');
+        }
+
+        async function getProgress() {
+            return await fetchAPI('progress');
+        }
+
+        // Example usage of API endpoints
+        async function updateFromAPI() {
+            const apiSchedule = await getSchedule();
+            const apiProgress = await getProgress();
+
+            if (apiSchedule) {
+                // Update schedule with data from API
+                // This is a placeholder and should be implemented based on your API structure
+                console.log('Schedule from API:', apiSchedule);
+            }
+
+            if (apiProgress) {
+                // Update progress with data from API
+                // This is a placeholder and should be implemented based on your API structure
+                console.log('Progress from API:', apiProgress);
+            }
+        }
+
+        // Call updateFromAPI when the page loads
+        updateFromAPI();
+
+        // You might want to set up periodic updates
+        setInterval(updateFromAPI, 60000); // Update every minute
     </script>
 </body>
 </html>
