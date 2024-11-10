@@ -170,43 +170,11 @@
     </div>
 
     <script>
-        // Cookie functions
-        function setCookie(name, value, days) {
-            const expires = new Date(Date.now() + days * 864e5).toUTCString();
-            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
-        }
-
-        function getCookie(name) {
-            return document.cookie.split('; ').reduce((r, v) => {
-                const parts = v.split('=');
-                return parts[0] === name ? decodeURIComponent(parts[1]) : r;
-            }, '');
-        }
-
-        // Dark Mode Toggle
-        const modeToggle = document.getElementById('modeToggle');
-        const html = document.documentElement;
-
-        function setDarkMode(isDark) {
-            if (isDark) {
-                html.classList.add('dark');
-                modeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
-                modeToggle.setAttribute('aria-label', 'تبديل إلى الوضع النهاري');
-            } else {
-                html.classList.remove('dark');
-                modeToggle.querySelector('i').classList.replace('fa-sun', 'fa-moon');
-                modeToggle.setAttribute('aria-label', 'تبديل إلى الوضع الليلي');
-            }
-            setCookie('darkMode', isDark ? '1' : '0', 365);
-        }
-
-        // Load dark mode preference from cookie
-        const savedDarkMode = getCookie('darkMode') === '1';
-        setDarkMode(savedDarkMode);
-
-        modeToggle.addEventListener('click', () => {
-            setDarkMode(!html.classList.contains('dark'));
-        });
+        // Sound effects
+        const sounds = {
+            success: new Howl({ src: ['success.mp3'] }),
+            failure: new Howl({ src: ['insuccess.mp3'] })
+        };
 
         // Study Schedule
         const scheduleData = [
@@ -226,7 +194,7 @@
         const globalProgressBar = document.querySelector('#globalProgressBar > div');
 
         function loadStudyStatus() {
-            const savedStatus = JSON.parse(getCookie('studyStatus') || '{}');
+            const savedStatus = JSON.parse(localStorage.getItem('studyStatus') || '{}');
             scheduleTable.innerHTML = '';
             scheduleData.forEach((item, index) => {
                 const row = scheduleTable.insertRow();
@@ -268,7 +236,7 @@
             document.querySelectorAll('.status-btn').forEach(button => {
                 status[button.dataset.day] = button.textContent.trim();
             });
-            setCookie('studyStatus', JSON.stringify(status), 365);
+            localStorage.setItem('studyStatus', JSON.stringify(status));
         }
 
         scheduleTable.addEventListener('click', (e) => {
@@ -279,8 +247,10 @@
                     button.textContent = 'جاري الدراسة';
                 } else if (currentStatus === 'جاري الدراسة') {
                     button.textContent = 'تم الإنجاز';
+                    sounds.success.play();
                 } else {
                     button.textContent = 'لم يبدأ';
+                    sounds.failure.play();
                 }
                 updateButtonStyle(button);
                 updateProgress();
@@ -364,7 +334,7 @@
         const newTaskInput = document.getElementById('newTaskInput');
 
         function loadTasks() {
-            const savedTasks = JSON.parse(getCookie('tasks') || '[]');
+            const savedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
             taskList.innerHTML = '';
             savedTasks.forEach((task, index) => {
                 const newTask = createTaskElement(task, index);
@@ -377,7 +347,7 @@
                 text: li.querySelector('label').textContent,
                 completed: li.querySelector('input[type="checkbox"]').checked
             }));
-            setCookie('tasks', JSON.stringify(tasks), 365);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
         }
 
         function createTaskElement(task, index) {
@@ -394,11 +364,18 @@
             li.querySelector('input[type="checkbox"]').addEventListener('change', (e) => {
                 e.target.nextElementSibling.classList.toggle('line-through', e.target.checked);
                 saveTasks();
-                showToast(e.target.checked ? 'تم إكمال المهمة!' : 'تم إلغاء إكمال المهمة');
+                if (e.target.checked) {
+                    sounds.success.play();
+                    showToast('تم إكمال المهمة!');
+                } else {
+                    sounds.failure.play();
+                    showToast('تم إلغاء إكمال المهمة');
+                }
             });
             li.querySelector('.delete-task').addEventListener('click', () => {
                 li.remove();
                 saveTasks();
+                sounds.failure.play();
                 showToast('تم حذف المهمة');
             });
             return li;
@@ -418,6 +395,7 @@
                 taskList.appendChild(newTask);
                 newTaskInput.value = '';
                 saveTasks();
+                sounds.success.play();
                 showToast('تمت إضافة مهمة جديدة');
             }
         }
@@ -466,7 +444,7 @@
             'كيف أبدأ': 'للبدء، حاول تحديد أهدافك الدراسية لهذا الأسبوع. ثم استخدم جدول الدراسة لتتبع تقدمك في كل مادة.',
             'نصائح للتركيز': 'جرب تقنية بومودورو: ادرس لمدة 25 دقيقة، ثم خذ استراحة لمدة 5 دقائق. كرر هذه الدورة 4 مرات، ثم خذ استراحة أطول.',
             'كيف أحسن حفظي': 'جرب استخدام تقنيات مثل المراجعة المتكررة، وإنشاء خرائط ذهنية، وشرح المفاهيم لشخص آخر لتحسين الحفظ.',
-            'دعم نفسي': 'تذكر أنك قادر على تحقيق أهدافك! خذ الأمور خطوة بخطوة، واحتفل بكل إنجاز صغير. إذا شعرت بالإرهاق، خ استراحة قصيرة وعد بنشاط جديد.'
+            'دعم نفسي': 'تذكر أنك قادر على تحقيق أهدافك! خذ الأمور خطوة بخطوة، واحتفل بكل إنجاز صغير. إذا شعرت بالإرهاق، خذ استراحة قصيرة وعد بنشاط جديد.'
         };
 
         chatbotSend.addEventListener('click', sendChatMessage);
@@ -482,7 +460,6 @@
                 addChatMessage(message, true);
                 chatbotInput.value = '';
                 
-                // Simple bot response logic
                 let botResponse = 'عذرًا، لم أفهم سؤالك. هل يمكنك إعادة صياغته أو طرح سؤال اخر (اكتب مساعده ) لمعرفه أوامر البوت؟';
                 for (const [key, value] of Object.entries(chatbotResponses)) {
                     if (message.toLowerCase().includes(key)) {
@@ -553,11 +530,11 @@
         const additionalNotes = document.getElementById('additionalNotes');
 
         function loadNotes() {
-            additionalNotes.value = getCookie('additionalNotes') || '';
+            additionalNotes.value = localStorage.getItem('additionalNotes') || '';
         }
 
         function saveNotes() {
-            setCookie('additionalNotes', additionalNotes.value, 365);
+            localStorage.setItem('additionalNotes', additionalNotes.value);
         }
 
         additionalNotes.addEventListener('input', saveNotes);
@@ -565,20 +542,30 @@
         // Load saved notes
         loadNotes();
 
-        // Social Media Sharing
-        function shareProgress() {
-            const progress = progressText.textContent;
-            const message = `أنا أدرس بجد! ${progress} من جدول دراستي الأسبوعي. 📚💪 #StudyProgress`;
-            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
-            window.open(twitterUrl, '_blank');
+        // Dark Mode Toggle
+        const modeToggle = document.getElementById('modeToggle');
+        const html = document.documentElement;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                html.classList.add('dark');
+                modeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+                modeToggle.setAttribute('aria-label', 'تبديل إلى الوضع النهاري');
+            } else {
+                html.classList.remove('dark');
+                modeToggle.querySelector('i').classList.replace('fa-sun', 'fa-moon');
+                modeToggle.setAttribute('aria-label', 'تبديل إلى الوضع الليلي');
+            }
+            localStorage.setItem('darkMode', isDark ? '1' : '0');
         }
 
-        // Add a share button to the progress section
-        const shareButton = document.createElement('button');
-        shareButton.textContent = 'مشاركة التقدم';
-        shareButton.className = 'mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors duration-300';
-        shareButton.addEventListener('click', shareProgress);
-        document.querySelector('.bg-white.dark\\:bg-gray-800:first-of-type').appendChild(shareButton);
+        // Load dark mode preference from localStorage
+        const savedDarkMode = localStorage.getItem('darkMode') === '1';
+        setDarkMode(savedDarkMode);
+
+        modeToggle.addEventListener('click', () => {
+            setDarkMode(!html.classList.contains('dark'));
+        });
     </script>
 </body>
 </html>
